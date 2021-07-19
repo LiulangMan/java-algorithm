@@ -1,0 +1,3 @@
+name=LiXueLian
+age=21
+lover=ZhongJiWei

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Beans>
+<!--声面对象-->
+    <bean id = "userControl" class = "Spring.Control.Control">
+        <!--依赖注入-->
+        <property name = "userServer" ref = "userServer">
+        </property>
+    </bean>
+
+
+</Beans>
