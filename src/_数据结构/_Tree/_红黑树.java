@@ -360,7 +360,7 @@ class RedBlackTree {
         }
 
         //如果前两个条件都不满足，则是根节点
-        else return null;
+        return null;
     }
 
     public ArrayList<Integer> integers(){

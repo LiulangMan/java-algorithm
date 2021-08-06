@@ -24,7 +24,7 @@ public class MyMap {
     public static void main(String[] args) {
         MyMap myMap = new MyMap();
         myMap.putValue(Integer.class,11);
-        myMap.putValue(String.class,"李雪莲");
+        myMap.putValue(String.class,"");
         Integer value = myMap.getValue(Integer.class);
         String value1 = myMap.getValue(String.class);
         System.out.println(value);

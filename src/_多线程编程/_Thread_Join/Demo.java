@@ -34,6 +34,7 @@ public class Demo {
             try {
                 //只有thread线程终止，才可以从join()返回
                 thread.join();
+                SleepUtils.second(1);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
