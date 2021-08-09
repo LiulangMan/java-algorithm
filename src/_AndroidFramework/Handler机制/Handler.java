@@ -4,7 +4,6 @@ package _AndroidFramework.Handler机制;
 //手写一个android handler
 public abstract class Handler {
 
-    private MessageQueue mMessageQueue;
     private Message mMessage;
     private Looper mLooper;
 
@@ -15,10 +14,6 @@ public abstract class Handler {
             throw new Error("looper not exist where current thread !");
         }
         this.mLooper = looper;
-        this.mMessageQueue = new MessageQueue();
-
-        //创建完毕后再绑定looper
-        looper.setHandler(this);
     }
 
     public Handler(Looper looper) {
@@ -26,9 +21,6 @@ public abstract class Handler {
             throw new NullPointerException("");
         }
         this.mLooper = looper;
-        this.mMessageQueue = new MessageQueue();
-        //创建完毕后再绑定looper
-        looper.setHandler(this);
     }
 
     public void post(Runnable runnable) {
@@ -41,15 +33,11 @@ public abstract class Handler {
 
     public void sendMessage(Message message) {
         message.sendWhen = System.currentTimeMillis();
-        this.mMessageQueue.offer(message);
+        message.target = this;
+        this.mLooper.getMessageQueue().offer(message);
     }
 
-    public abstract void handleMessage(Message message);
-
-
-    public MessageQueue getMessageQueue() {
-        return mMessageQueue;
-    }
+    protected abstract void handleMessage(Message message);
 
     public Looper getLooper() {
         return mLooper;

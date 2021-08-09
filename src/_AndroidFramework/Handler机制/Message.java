@@ -22,6 +22,7 @@ public final class Message {
     public Long sendWhen;
     public Object arg1;
     public Object arg2;
+    public Handler target;
 
     //是否可以处理当前消息？
     public boolean doHandleMessage() {
@@ -47,6 +48,7 @@ public final class Message {
         message.sendWhen = null;
         message.what = null;
         message.callback = null;
+        message.target = null;
         cache.addLast(message);
     }
 

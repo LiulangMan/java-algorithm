@@ -1,5 +1,8 @@
 package _AndroidFramework.Handler机制;
 
+import java.util.ArrayList;
+import java.util.List;
+
 //循环读取者
 public class Looper {
 
@@ -10,8 +13,8 @@ public class Looper {
         looperThreadLocal = new ThreadLocal<>();
     }
 
-    private Handler mHandler;
     private Message mMessage;
+    private MessageQueue mMessageQueue = new MessageQueue();
     private volatile boolean quit = false;
 
     private Looper() {
@@ -48,16 +51,14 @@ public class Looper {
 
         while (true) {
 
-            if (looper.mHandler == null) continue;
-
-            looper.mMessage = looper.mHandler.getMessageQueue().peek();
+            looper.mMessage = looper.mMessageQueue.peek();
             if (looper.mMessage == null || !looper.mMessage.doHandleMessage()) {
                 continue;
             }
 
             //开始处理消息
-            looper.mMessage = looper.mHandler.getMessageQueue().poll();
-            looper.mHandler.handleMessage(looper.mMessage);
+            looper.mMessage = looper.mMessageQueue.poll();
+            looper.mMessage.target.handleMessage(looper.mMessage);
             //处理完消息后，放入缓存池
             Message.addCache(looper.mMessage);
             looper.mMessage = null;
@@ -69,7 +70,7 @@ public class Looper {
         this.quit = true;
     }
 
-    public void setHandler(Handler mHandler) {
-        this.mHandler = mHandler;
+    public MessageQueue getMessageQueue() {
+        return mMessageQueue;
     }
 }
