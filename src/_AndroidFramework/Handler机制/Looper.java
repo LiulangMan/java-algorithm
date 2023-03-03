@@ -46,7 +46,6 @@ public class Looper {
                 //返回null，表示退出
                 return;
             }
-            message = looper.mMessageQueue.poll();
             message.target.dispatchMessage(message);
 
             //处理完消息后，放入缓存池

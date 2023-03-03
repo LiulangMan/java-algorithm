@@ -111,27 +111,31 @@ public class MessageQueue {
      **/
 
     public void offer(Message message) {
-        if (this.insertTail(new Node(message))) {
-            this.size++;
+        synchronized (this) {
+            if (this.insertTail(new Node(message))) {
+                this.size++;
+            }
         }
     }
 
     Message next() {
         for (; ; ) {
-            if (quit) {
-                recycleAllMessage();
-                return null;
-            }
+            synchronized (this) {
+                if (quit) {
+                    recycleAllMessage();
+                    return null;
+                }
 
-            if (head == null || head.message.when < System.currentTimeMillis()) {
-                continue;
-            }
+                if (head == null || head.message.when < System.currentTimeMillis()) {
+                    continue;
+                }
 
-            return poll();
+                return poll();
+            }
         }
     }
 
-    Message poll() {
+    private Message poll() {
         Node node = this.removeFromHead();
 
         if (node == null) {
