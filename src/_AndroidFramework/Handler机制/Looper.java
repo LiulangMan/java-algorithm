@@ -1,68 +1,65 @@
 package _AndroidFramework.Handler机制;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.sun.istack.internal.Nullable;
 
 //循环读取者
 public class Looper {
 
-    public static ThreadLocal<Looper> looperThreadLocal;
-    private static Looper mMainLooper;
-
-    static {
-        looperThreadLocal = new ThreadLocal<>();
-    }
-
-    private Message mMessage;
-    private MessageQueue mMessageQueue = new MessageQueue();
+    final static ThreadLocal<Looper> sLooperThreadLocal = new ThreadLocal<>();
+    private static Looper sMainLooper;
+    private final MessageQueue mMessageQueue = new MessageQueue();
     private volatile boolean quit = false;
 
     private Looper() {
     }
 
+    @Nullable
     public static Looper getLooper() {
-        return looperThreadLocal.get();
+        return sLooperThreadLocal.get();
     }
 
     public static Looper getMainLooper() {
-        return mMainLooper;
+        return sMainLooper;
     }
 
     public static void prepare() {
-        if (looperThreadLocal.get() != null) {
+        if (sLooperThreadLocal.get() != null) {
             throw new Error("current thread already has prepared!");
         }
 
-        looperThreadLocal.set(new Looper());
+        sLooperThreadLocal.set(new Looper());
     }
 
     public static void prepareMain() {
         prepare();
-        mMainLooper = getLooper();
+        sMainLooper = getLooper();
     }
-//                        e.printStackTrace();
 
     public static void loop() {
         //do something
-        Looper looper = looperThreadLocal.get();
+        Looper looper = sLooperThreadLocal.get();
         if (looper == null) {
-            throw new Error("please use prepare() to create looper!");
+            throw new RuntimeException("please use prepare() to create looper!");
         }
 
         while (true) {
 
-            looper.mMessage = looper.mMessageQueue.peek();
-            if (looper.mMessage == null || !looper.mMessage.doHandleMessage()) {
+            Message message = looper.mMessageQueue.peek();
+            if (message == null || message.sendWhen + message.when < System.currentTimeMillis()) {
                 continue;
             }
+            message = looper.mMessageQueue.poll();
+            if (message.callback != null) {
+                message.callback.run();
+            } else {
+                message.target.handleMessage(message);
+            }
 
-            //开始处理消息
-            looper.mMessage = looper.mMessageQueue.poll();
-            looper.mMessage.target.handleMessage(looper.mMessage);
             //处理完消息后，放入缓存池
-            Message.addCache(looper.mMessage);
-            looper.mMessage = null;
-            if (looper.quit) return;
+            message.recycle();
+            if (looper.quit) {
+                return;
+            }
         }
     }
 
@@ -70,7 +67,7 @@ public class Looper {
         this.quit = true;
     }
 
-    public MessageQueue getMessageQueue() {
+    MessageQueue getMessageQueue() {
         return mMessageQueue;
     }
 }

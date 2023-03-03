@@ -1,15 +1,17 @@
 package _AndroidFramework.Handler机制;
 
 
+import com.sun.istack.internal.NotNull;
+
 //手写一个android handler
 public abstract class Handler {
 
-    private Message mMessage;
-    private Looper mLooper;
+    @NotNull
+    private final Looper mLooper;
 
 
     public Handler() {
-        Looper looper = Looper.looperThreadLocal.get();
+        Looper looper = Looper.sLooperThreadLocal.get();
         if (looper == null) {
             throw new Error("looper not exist where current thread !");
         }
@@ -24,10 +26,18 @@ public abstract class Handler {
     }
 
     public void post(Runnable runnable) {
-        this.mMessage = Message.obtain();
+        Message mMessage = Message.obtain();
         mMessage.callback = runnable;
         mMessage.when = 0L;
-        mMessage.what = null;
+        mMessage.what = 0;
+        this.sendMessage(mMessage);
+    }
+
+    public void postDelay(Runnable runnable, long delay) {
+        Message mMessage = Message.obtain();
+        mMessage.callback = runnable;
+        mMessage.when = delay;
+        mMessage.what = 0;
         this.sendMessage(mMessage);
     }
 
@@ -37,13 +47,12 @@ public abstract class Handler {
         this.mLooper.getMessageQueue().offer(message);
     }
 
+    public void sendMessageDelay(Message message, long delay) {
+        message.sendWhen = System.currentTimeMillis();
+        message.target = this;
+        message.when = delay;
+        this.mLooper.getMessageQueue().offer(message);
+    }
+
     protected abstract void handleMessage(Message message);
-
-    public Looper getLooper() {
-        return mLooper;
-    }
-
-    public void setLooper(Looper mLooper) {
-        this.mLooper = mLooper;
-    }
 }

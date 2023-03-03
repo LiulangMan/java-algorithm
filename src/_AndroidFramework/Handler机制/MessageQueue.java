@@ -1,5 +1,6 @@
 package _AndroidFramework.Handler机制;
 
+
 //优先级队列
 public class MessageQueue {
 
@@ -34,7 +35,7 @@ public class MessageQueue {
     }
 
 
-    private boolean insertToLinkTail(Node node) {
+    private boolean insertTail(Node node) {
 
         if (this.head == null) {
             this.head = this.tail = node;
@@ -72,7 +73,7 @@ public class MessageQueue {
         }
     }
 
-    private Node removeFromLinkHead() {
+    private Node removeFromHead() {
 
         if (head == null) return null;
 
@@ -92,38 +93,23 @@ public class MessageQueue {
      * 消息api
      **/
 
-    public boolean offer(Message message) {
-        synchronized (this) {
-            if (this.insertToLinkTail(new Node(message))) {
-                this.size++;
-                return true;
-            }
-            return false;
+    public void offer(Message message) {
+        if (this.insertTail(new Node(message))) {
+            this.size++;
         }
     }
 
-    public Message poll() {
-        synchronized (this) {
-            Node node = this.removeFromLinkHead();
+    Message poll() {
+        Node node = this.removeFromHead();
 
-            if (node == null) {
-                return null;
-            }
-            this.size--;
-            return node.message;
+        if (node == null) {
+            return null;
         }
+        this.size--;
+        return node.message;
     }
 
-    public Message peek() {
-        synchronized (this) {
-            if (head == null) return null;
-            return head.message;
-        }
-    }
-
-    public int getSize() {
-       synchronized (this){
-           return this.size;
-       }
+    Message peek() {
+        return head == null ? null : head.message;
     }
 }

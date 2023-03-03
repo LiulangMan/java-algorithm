@@ -24,11 +24,11 @@ public abstract class AsyncTask<Params, Progress, Result> {
             @Override
             public void handleMessage(Message message) {
                 switch (message.what) {
-                    case "DONE":
+                    case 0:
                         done(results);
                         executorService.shutdown();
                         break;
-                    case "DOING":
+                    case 1:
                         doing((Progress[]) message.arg1);
                         break;
                     default:
@@ -55,7 +55,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
             results = doInBackground(params);
             //任务完成后，发信息给handler
             Message message = Message.obtain();
-            message.what = "DONE";
+            message.what = 0;
             message.when = 0L;
             message.arg1 = results;
             mainHandler.sendMessage(message);
@@ -65,7 +65,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
     protected final void publishProgress(Progress[] progress) {
         //在doInBackground中调用
         Message message = Message.obtain();
-        message.what = "DOING";
+        message.what = 1;
         message.when = 0L;
         message.arg1 = progress;
         System.out.println("更新状态----" + Thread.currentThread().getName() + "  " + Arrays.toString(progress));

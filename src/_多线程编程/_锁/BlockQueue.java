@@ -10,10 +10,10 @@ import java.util.concurrent.locks.Lock;
  * @Text: 使用Condition方法实现阻塞队列
  */
 public class BlockQueue<T> {
-    private Object[] items;
-    private Lock lock = new ReentrantLock();
-    private Condition notEmpty = lock.newCondition();
-    private Condition notFull = lock.newCondition();
+    private final Object[] items;
+    private final Lock lock = new ReentrantLock();
+    private final Condition notEmpty = lock.newCondition();
+    private final Condition notFull = lock.newCondition();
 
     private int addIndex, removeIndex, count;
 

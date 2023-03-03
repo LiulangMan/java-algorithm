@@ -5,51 +5,44 @@ import java.util.LinkedList;
 //消息
 public final class Message {
 
-
-    private static LinkedList<Message> cache;
+    private final static LinkedList<Message> sMessageCachePools = new LinkedList<>();
     private static final int CACHE_SIZE = 30;
 
-    static {
-        cache = new LinkedList<>();
-        for (int i = 0; i < CACHE_SIZE; i++) {
-            cache.addLast(new Message());
-        }
-    }
-
-    public String what;
-    public Long when;
+    public int what;
+    public long when;
     public Runnable callback;
-    public Long sendWhen;
+    public long sendWhen;
     public Object arg1;
     public Object arg2;
+
     public Handler target;
 
-    //是否可以处理当前消息？
-    public boolean doHandleMessage() {
-        return System.currentTimeMillis() >= sendWhen + when;
-    }
+    //是否可以处理当前消息
 
     /**
      * 享元模式
      **/
     public static Message obtain() {
-        if (cache.size() >= CACHE_SIZE) {
-            return new Message();
-        }
+        synchronized (sMessageCachePools) {
+            if (sMessageCachePools.size() >= CACHE_SIZE || sMessageCachePools.isEmpty()) {
+                return new Message();
+            }
 
-        return cache.removeFirst();
+            return sMessageCachePools.removeFirst();
+        }
     }
 
-    public static void addCache(Message message) {
-        if (message == null) return;
-        if (cache.size() >= CACHE_SIZE) return;
+    public void recycle() {
+        this.when = 0;
+        this.sendWhen = 0;
+        this.what = 0;
+        this.callback = null;
+        this.target = null;
 
-        message.when = null;
-        message.sendWhen = null;
-        message.what = null;
-        message.callback = null;
-        message.target = null;
-        cache.addLast(message);
+        synchronized (sMessageCachePools) {
+            if (sMessageCachePools.size() >= CACHE_SIZE) return;
+            sMessageCachePools.addLast(this);
+        }
     }
 
     @Override
