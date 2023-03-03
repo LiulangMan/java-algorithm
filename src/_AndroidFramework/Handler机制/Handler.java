@@ -36,23 +36,29 @@ public abstract class Handler {
     public void postDelay(Runnable runnable, long delay) {
         Message mMessage = Message.obtain();
         mMessage.callback = runnable;
-        mMessage.when = delay;
+        mMessage.when = delay + System.currentTimeMillis();
         mMessage.what = 0;
         this.sendMessage(mMessage);
     }
 
     public void sendMessage(Message message) {
-        message.sendWhen = System.currentTimeMillis();
         message.target = this;
         this.mLooper.getMessageQueue().offer(message);
     }
 
     public void sendMessageDelay(Message message, long delay) {
-        message.sendWhen = System.currentTimeMillis();
         message.target = this;
-        message.when = delay;
+        message.when = delay + System.currentTimeMillis();
         this.mLooper.getMessageQueue().offer(message);
     }
 
     protected abstract void handleMessage(Message message);
+
+    void dispatchMessage(Message message) {
+        if (message.callback != null) {
+            message.callback.run();
+        } else {
+            message.target.handleMessage(message);
+        }
+    }
 }

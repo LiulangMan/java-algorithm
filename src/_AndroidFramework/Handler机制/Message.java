@@ -10,12 +10,10 @@ public final class Message {
 
     public int what;
     public long when;
-    public Runnable callback;
-    public long sendWhen;
     public Object arg1;
     public Object arg2;
-
-    public Handler target;
+    Runnable callback;
+    Handler target;
 
     //是否可以处理当前消息
 
@@ -34,7 +32,6 @@ public final class Message {
 
     public void recycle() {
         this.when = 0;
-        this.sendWhen = 0;
         this.what = 0;
         this.callback = null;
         this.target = null;
@@ -50,7 +47,6 @@ public final class Message {
         return "Message{" +
                 "what='" + what + '\'' +
                 ", when=" + when +
-                ", sendWhen=" + sendWhen +
                 ", arg1=" + arg1 +
                 ", arg2=" + arg2 +
                 '}';

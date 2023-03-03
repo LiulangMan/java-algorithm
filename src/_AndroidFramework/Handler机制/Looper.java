@@ -8,8 +8,6 @@ public class Looper {
     final static ThreadLocal<Looper> sLooperThreadLocal = new ThreadLocal<>();
     private static Looper sMainLooper;
     private final MessageQueue mMessageQueue = new MessageQueue();
-    private volatile boolean quit = false;
-
     private Looper() {
     }
 
@@ -43,28 +41,21 @@ public class Looper {
         }
 
         while (true) {
-
-            Message message = looper.mMessageQueue.peek();
-            if (message == null || message.sendWhen + message.when < System.currentTimeMillis()) {
-                continue;
+            Message message = looper.mMessageQueue.next();
+            if (message == null) {
+                //返回null，表示退出
+                return;
             }
             message = looper.mMessageQueue.poll();
-            if (message.callback != null) {
-                message.callback.run();
-            } else {
-                message.target.handleMessage(message);
-            }
+            message.target.dispatchMessage(message);
 
             //处理完消息后，放入缓存池
             message.recycle();
-            if (looper.quit) {
-                return;
-            }
         }
     }
 
     public void quit() {
-        this.quit = true;
+        mMessageQueue.quite();
     }
 
     MessageQueue getMessageQueue() {

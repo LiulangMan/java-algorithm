@@ -14,11 +14,17 @@ public class MessageQueue {
     //队列尾
     private Node tail;
 
+    private volatile boolean quit = false;
+
 
     public MessageQueue() {
         this.size = 0;
         this.head = null;
         this.tail = null;
+    }
+
+    void quite() {
+        quit = true;
     }
 
     /**
@@ -88,6 +94,17 @@ public class MessageQueue {
         return p;
     }
 
+    private void recycleAllMessage() {
+        Node pt = head;
+        while (pt != null) {
+            pt.message.recycle();
+            pt = pt.next;
+        }
+
+        head = tail = null;
+        size = 0;
+    }
+
 
     /**
      * 消息api
@@ -99,6 +116,21 @@ public class MessageQueue {
         }
     }
 
+    Message next() {
+        for (; ; ) {
+            if (quit) {
+                recycleAllMessage();
+                return null;
+            }
+
+            if (head == null || head.message.when < System.currentTimeMillis()) {
+                continue;
+            }
+
+            return poll();
+        }
+    }
+
     Message poll() {
         Node node = this.removeFromHead();
 
@@ -107,9 +139,5 @@ public class MessageQueue {
         }
         this.size--;
         return node.message;
-    }
-
-    Message peek() {
-        return head == null ? null : head.message;
     }
 }
